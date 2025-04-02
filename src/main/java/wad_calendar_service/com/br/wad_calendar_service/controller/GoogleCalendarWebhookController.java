@@ -31,8 +31,8 @@ public class GoogleCalendarWebhookController {
             @RequestHeader("X-Goog-Resource-State") String resourceState,
             @RequestBody Map<String, Object> notification) {
         
-        logger.info("Recebida notificação do Google Calendar: channelId={}, resourceId={}, state={}", 
-                channelId, resourceId, resourceState);
+        logger.info("Recebida notificação do Google Calendar - ChannelID: {}, ResourceID: {}, State: {}, Payload: {}", 
+                channelId, resourceId, resourceState, notification);
         
         try {
             if ("exists".equals(resourceState) || "update".equals(resourceState)) {
@@ -41,16 +41,25 @@ public class GoogleCalendarWebhookController {
                     String eventId = (String) eventData.get("id");
                     String eventStatus = (String) eventData.get("status");
                     
-                    appointmentService.processGoogleCalendarNotification(eventId, eventStatus);
-                    logger.info("Notificação do Google Calendar processada com sucesso: eventId={}, status={}", 
+                    logger.info("Processando notificação do Google Calendar - EventID: {}, Status: {}", 
                             eventId, eventStatus);
+                    
+                    appointmentService.processGoogleCalendarNotification(eventId, eventStatus);
+                    
+                    logger.info("Notificação do Google Calendar processada com sucesso - EventID: {}", eventId);
+                } else {
+                    logger.warn("Notificação do Google Calendar sem dados de evento - ChannelID: {}", channelId);
                 }
+            } else {
+                logger.info("Estado do recurso não requer processamento - State: {}", resourceState);
             }
             
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            logger.error("Erro ao processar notificação do Google Calendar: {}", e.getMessage(), e);
-            return ResponseEntity.ok().build(); // Sempre retornar 200 para o Google (requisito da API)
+            logger.error("Erro ao processar notificação do Google Calendar - ChannelID: {}, Erro: {}", 
+                    channelId, e.getMessage(), e);
+            // Sempre retornar 200 para o Google (requisito da API)
+            return ResponseEntity.ok().build();
         }
     }
 }

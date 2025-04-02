@@ -39,4 +39,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
      */
     @Query("SELECT a FROM Appointment a WHERE a.date = :date AND a.status = 'AGENDADA' AND a.confirmationSent = false")
     List<Appointment> findUpcomingAppointmentsForConfirmation(@Param("date") LocalDate date);
+    
+    /**
+     * Busca todos os agendamentos pelo número de telefone
+     */
+    List<Appointment> findByPhoneNumber(String phoneNumber);
 }

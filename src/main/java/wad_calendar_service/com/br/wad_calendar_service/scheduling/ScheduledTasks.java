@@ -7,6 +7,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import wad_calendar_service.com.br.wad_calendar_service.service.AppointmentService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * Componente responsável por agendar tarefas periódicas
  */
@@ -14,6 +18,7 @@ import wad_calendar_service.com.br.wad_calendar_service.service.AppointmentServi
 public class ScheduledTasks {
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledTasks.class);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
     private AppointmentService appointmentService;
@@ -24,12 +29,17 @@ public class ScheduledTasks {
      */
     @Scheduled(cron = "0 0 10 * * ?")
     public void processConfirmations() {
-        logger.info("Iniciando processamento de confirmações automáticas");
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        logger.info("==== INICIANDO TAREFA AGENDADA: Processamento de confirmações para {} ====", tomorrow);
+        logger.info("Horário de execução: {}", LocalDateTime.now().format(DATE_FORMATTER));
+        
         try {
             appointmentService.processConfirmations();
             logger.info("Processamento de confirmações concluído com sucesso");
         } catch (Exception e) {
             logger.error("Erro ao processar confirmações automáticas: {}", e.getMessage(), e);
         }
+        
+        logger.info("==== TAREFA AGENDADA FINALIZADA ====");
     }
 }
